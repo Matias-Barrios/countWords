@@ -12,11 +12,14 @@ import (
 
 var filename string
 
-func init() {
-	CPUprofiling()
-}
-
 func main() {
+	fd, err := os.Create(".cpu.prof")
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	defer fd.Close()
+	pprof.StartCPUProfile(fd)
+	defer pprof.StopCPUProfile()
 
 	flag.StringVar(&filename, "f", "", "Path to the input file")
 	flag.Parse()
@@ -83,16 +86,6 @@ func removeNonWordChars(input string) string {
 		}
 	}
 	return result
-}
-
-func CPUprofiling() {
-	fd, err := os.Create(".cpu.prof")
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	defer fd.Close()
-	pprof.StartCPUProfile(fd)
-	defer pprof.StopCPUProfile()
 }
 
 func MEMprofiling() {
