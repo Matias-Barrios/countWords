@@ -11,6 +11,7 @@ import (
 )
 
 var filename string
+var lengthOfWord int
 
 func main() {
 	fd, err := os.Create(".cpu.prof")
@@ -22,7 +23,12 @@ func main() {
 	defer pprof.StopCPUProfile()
 
 	flag.StringVar(&filename, "f", "", "Path to the input file")
+	flag.IntVar(&lengthOfWord, "l", 4, "Minimum inclusive word length to count")
+
 	flag.Parse()
+	if lengthOfWord < 1 {
+		lengthOfWord = 1
+	}
 	if filename == "" {
 		flag.Usage()
 		log.Fatalln()
@@ -43,10 +49,12 @@ func getResults(path string) map[string]int {
 	scanner := bufio.NewScanner(fd)
 	scanner.Split(bufio.ScanWords)
 	for scanner.Scan() {
-		if _, ok := results[scanner.Text()]; ok {
-			results[removeNonWordChars(scanner.Text())]++
-		} else {
-			results[removeNonWordChars(scanner.Text())] = 1
+		if len(scanner.Text()) >= lengthOfWord {
+			if _, ok := results[scanner.Text()]; ok {
+				results[removeNonWordChars(scanner.Text())]++
+			} else {
+				results[removeNonWordChars(scanner.Text())] = 1
+			}
 		}
 	}
 	return results
